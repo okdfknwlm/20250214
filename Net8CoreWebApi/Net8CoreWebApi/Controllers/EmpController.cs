@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Net8CoreWebApi.Models;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Net8CoreWebApi.Controllers
 {
@@ -8,36 +8,33 @@ namespace Net8CoreWebApi.Controllers
     [ApiController]
     public class EmpController : ControllerBase
     {
-        // GET: api/<EmpController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly EmpModels _model;
+        private readonly IHttpContextAccessor _http;
+        private readonly IWebHostEnvironment _webHost;
+        public EmpController(IHttpContextAccessor http, IWebHostEnvironment webHost ,EmpModels model)
         {
-            return new string[] { "value1", "value2" };
+            _http = http;
+            _webHost = webHost;
+            _model = model;
         }
 
-        // GET api/<EmpController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
+        [HttpGet]
+        public ActionResult GetEmpList() => Ok(_model.ListEmp());        
 
         // POST api/<EmpController>
         [HttpPost]
-        public void Post([FromBody]string value)
-        {
-        }
+        public ActionResult CreateEmp(EmpModels.CreateEmpClass _class) => Ok(_model.CreateEmp(_class));
+
+        // GET api/emp/5
+        [HttpGet("{id}")]
+        public ActionResult UpdateGetEmp(EmpModels.UpdateGetEmpClass _class) => Ok(_model.UpdateGetEmp(_class));
 
         // PUT api/<EmpController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
+        public ActionResult UpdatePostEmp(EmpModels.UpdatePostEmpClass _class) => Ok(_model.UpdatePostEmp(_class));
 
         // DELETE api/<EmpController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+        public ActionResult DeleteEmp(EmpModels.DeleteEmpClass _class) => Ok(_model.DeleteEmp(_class));
     }
 }

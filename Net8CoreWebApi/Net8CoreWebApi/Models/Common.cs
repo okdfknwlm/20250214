@@ -15,12 +15,12 @@ namespace Net8CoreWebApi.Models
             _res = res;
         }
 
-        public string doAPI(string TypeX, string JsonData)
+        public string doAPI(string TypeX, string JsonData = null)
         {
             string str_json = string.Empty, _Result_Code = string.Empty, _Result = string.Empty;
             try
             {
-                if (!vaildJson(JsonData))
+                if (!vaildJson(JsonData) && JsonData != null)
                 {
                     _Result_Code = "-4";
                     _Result = "JsonErr";
@@ -33,40 +33,25 @@ namespace Net8CoreWebApi.Models
                     using (SqlCommand cmd = new SqlCommand("usp_CommonProcedure", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
+                        
+                        
                         cmd.Parameters.Add("@TypeX", SqlDbType.VarChar, 20).Value = TypeX;
-                        cmd.Parameters.Add("@json", SqlDbType.NVarChar, -1).Value = JsonData;
+                        cmd.Parameters.Add("@JsonX", SqlDbType.NVarChar, -1).Value = JsonData;
                         cmd.Parameters.Add("@Result_Code", SqlDbType.VarChar, 10).Direction = ParameterDirection.Output;
-                        cmd.Parameters.Add("@Result", SqlDbType.VarChar, -1).Direction = ParameterDirection.Output;
+                        cmd.Parameters.Add("@Result", SqlDbType.NVarChar, -1).Direction = ParameterDirection.Output;
 
                         cmd.CommandTimeout = 0;
+                        cmd.ExecuteNonQuery();
 
-                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        if (Convert.IsDBNull(cmd.Parameters["@Result_Code"].Value))
                         {
-                            if (!reader.HasRows)
-                            {
-                                _Result_Code = "-1";
-                                _Result = "查無資料";
-                            }
-                            else
-                            {
-                                System.Text.StringBuilder jsonResult = new System.Text.StringBuilder();
-                                while (reader.Read())
-                                {
-                                    jsonResult.Append(reader.GetValue(0).ToString());
-                                }
-                                str_json = jsonResult.ToString();
-
-                                if (Convert.IsDBNull(cmd.Parameters["@Result_Code"].Value))
-                                {
-                                    _Result_Code = "-2";
-                                    _Result = "查無資料";
-                                }
-                                else
-                                {
-                                    _Result_Code = cmd.Parameters["@Result_Code"].Value.ToString();
-                                    _Result = cmd.Parameters["@Result"].Value.ToString();
-                                }
-                            }
+                            _Result_Code = "-2";
+                            _Result = "查無資料";
+                        }
+                        else
+                        {
+                            _Result_Code = cmd.Parameters["@Result_Code"].Value.ToString();
+                            _Result = cmd.Parameters["@Result"].Value.ToString();
                         }
                     }
                 }
@@ -76,13 +61,9 @@ namespace Net8CoreWebApi.Models
                 _Result_Code = "-3";
                 _Result = "查無資料";
             }
-
-            if (_Result_Code != "0000")
-            {
-                _res.Result_Code = _Result_Code;
-                _res.Result = _Result;                
-            }
-            str_json = JsonConvert.SerializeObject(_res);
+            _res.Result = _Result;
+            _res.Result_Code = _Result_Code;
+            str_json = JsonConvert.SerializeObject(_res);            
             return str_json;
         }
 
