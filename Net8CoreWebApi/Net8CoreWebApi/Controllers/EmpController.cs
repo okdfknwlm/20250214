@@ -21,20 +21,20 @@ namespace Net8CoreWebApi.Controllers
         [HttpGet]
         public ActionResult GetEmpList() => Ok(_model.ListEmp());        
 
-        // POST api/<EmpController>
         [HttpPost]
         public ActionResult CreateEmp(EmpModels.CreateEmpClass _class) => Ok(_model.CreateEmp(_class));
 
-        // GET api/emp/5
         [HttpGet("{id}")]
-        public ActionResult UpdateGetEmp(EmpModels.UpdateGetEmpClass _class) => Ok(_model.UpdateGetEmp(_class));
+        public ActionResult GetEmp(int id) => Ok(_model.GetEmp(id));
 
-        // PUT api/<EmpController>/5
         [HttpPut("{id}")]
-        public ActionResult UpdatePostEmp(EmpModels.UpdatePostEmpClass _class) => Ok(_model.UpdatePostEmp(_class));
+        public ActionResult UpdateEmp(int id, EmpModels.UpdateEmpClass _class)
+        {
+            _class.EmployeeID = id;
+            return Ok(_model.UpdateEmp(id,_class));
+        }
 
-        // DELETE api/<EmpController>/5
         [HttpDelete("{id}")]
-        public ActionResult DeleteEmp(EmpModels.DeleteEmpClass _class) => Ok(_model.DeleteEmp(_class));
+        public ActionResult DeleteEmp(int id) => Ok(_model.DeleteEmp(id));
     }
 }

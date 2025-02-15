@@ -15,48 +15,47 @@ namespace Net8CoreWebApi.Models
             _res = res;
         }
 
-        public string doAPI(string TypeX, string JsonData = null)
+        public string DoAPI(string TypeX, int EmpID = 0, string JsonData = "")
         {
             string str_json = string.Empty, _Result_Code = string.Empty, _Result = string.Empty;
             try
             {
-                if (!vaildJson(JsonData) && JsonData != null)
+                if (!VaildJson(JsonData) && JsonData != "")
                 {
                     _Result_Code = "-4";
                     _Result = "JsonErr";
                     str_json = JsonConvert.SerializeObject(_res);
                     return str_json;
-                } 
-                using (SqlConnection conn = new SqlConnection(_connectionString))
+                }
+                using SqlConnection conn = new(_connectionString);
+                conn.Open();
+                using SqlCommand cmd = new("usp_CommonProcedure", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.Add("@TypeX", SqlDbType.VarChar, 20).Value = TypeX;
+                cmd.Parameters.Add("@JsonX", SqlDbType.NVarChar, -1).Value = JsonData;
+                if (EmpID != 0)
                 {
-                    conn.Open();
-                    using (SqlCommand cmd = new SqlCommand("usp_CommonProcedure", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        
-                        
-                        cmd.Parameters.Add("@TypeX", SqlDbType.VarChar, 20).Value = TypeX;
-                        cmd.Parameters.Add("@JsonX", SqlDbType.NVarChar, -1).Value = JsonData;
-                        cmd.Parameters.Add("@Result_Code", SqlDbType.VarChar, 10).Direction = ParameterDirection.Output;
-                        cmd.Parameters.Add("@Result", SqlDbType.NVarChar, -1).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@EmpId", SqlDbType.Int).Value = EmpID;
+                }
+                cmd.Parameters.Add("@Result_Code", SqlDbType.VarChar, 10).Direction = ParameterDirection.Output;
+                cmd.Parameters.Add("@Result", SqlDbType.NVarChar, -1).Direction = ParameterDirection.Output;
 
-                        cmd.CommandTimeout = 0;
-                        cmd.ExecuteNonQuery();
+                cmd.CommandTimeout = 0;
+                cmd.ExecuteNonQuery();
 
-                        if (Convert.IsDBNull(cmd.Parameters["@Result_Code"].Value))
-                        {
-                            _Result_Code = "-2";
-                            _Result = "查無資料";
-                        }
-                        else
-                        {
-                            _Result_Code = cmd.Parameters["@Result_Code"].Value.ToString();
-                            _Result = cmd.Parameters["@Result"].Value.ToString();
-                        }
-                    }
+                if (Convert.IsDBNull(cmd.Parameters["@Result_Code"].Value))
+                {
+                    _Result_Code = "-2";
+                    _Result = "查無資料";
+                }
+                else
+                {
+                    _Result_Code = cmd.Parameters["@Result_Code"].Value.ToString();
+                    _Result = cmd.Parameters["@Result"].Value.ToString();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _Result_Code = "-3";
                 _Result = "查無資料";
@@ -67,17 +66,15 @@ namespace Net8CoreWebApi.Models
             return str_json;
         }
 
-        private bool vaildJson(string Json)
+        private static bool VaildJson(string Json)
         {
             if (string.IsNullOrWhiteSpace(Json))
                 return false;
 
             try
             {
-                using (JsonDocument doc = JsonDocument.Parse(Json))
-                {
-                    return true;
-                }
+                using JsonDocument doc = JsonDocument.Parse(Json);
+                return true;
             }
             catch
             {
