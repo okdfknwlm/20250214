@@ -6,6 +6,12 @@ namespace Net8CoreMVC
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddHttpClient<ApiService>(client =>
+            {
+                client.BaseAddress = new Uri("https://api.example.com/");
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
@@ -28,7 +34,7 @@ namespace Net8CoreMVC
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Emp}/{action=Index}/{id?}");
 
             app.Run();
         }
