@@ -20,3 +20,24 @@ html {
 body {
   margin-bottom: 60px;
 }
+table.dataTable td, table.dataTable th {
+    white-space: nowrap;
+}
+
+table.dataTable thead {
+    background-color: #ACD6FF;
+    color: #333;
+}
+
+table.dataTable tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table.dataTable tbody tr:hover {
+    background-color: #e0e0e0;
+}
+
+#mytable th {
+    text-align: center;
+    vertical-align: middle;
+}

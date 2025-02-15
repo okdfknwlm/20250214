@@ -1,3 +1,6 @@
+using DataTables.AspNet.AspNetCore;
+using Net8CoreMVC.Services;
+
 namespace Net8CoreMVC
 {
     public class Program
@@ -6,15 +9,15 @@ namespace Net8CoreMVC
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddHttpClient<ApiService>(client =>
+            builder.Services.AddHttpClient<CallApiService>(client =>
             {
-                client.BaseAddress = new Uri("https://api.example.com/");
+                client.BaseAddress = new Uri("http://localhost:5217/api/Emp");
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
             });
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-
+            builder.Services.RegisterDataTables();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -34,7 +37,7 @@ namespace Net8CoreMVC
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Emp}/{action=Index}/{id?}");
+                pattern: "{controller=Employees}/{action=Index}/{id?}");
 
             app.Run();
         }

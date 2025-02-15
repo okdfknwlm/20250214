@@ -7,8 +7,6 @@ namespace Net8CoreMVC.Controllers
     public class EmployeesController : Controller
     {
         private readonly CallApiService _Api;
-
-        // 建構子注入 CallApiService
         public EmployeesController(CallApiService callApiService)
         {
             _Api = callApiService;

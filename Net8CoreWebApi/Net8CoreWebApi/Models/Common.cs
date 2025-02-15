@@ -15,17 +15,16 @@ namespace Net8CoreWebApi.Models
             _res = res;
         }
 
-        public string DoAPI(string TypeX, int EmpID = 0, string JsonData = "")
+        public ApiResponse DoAPI(string TypeX, int EmpID = 0, string JsonData = "")
         {
             string str_json = string.Empty, _Result_Code = string.Empty, _Result = string.Empty;
             try
             {
                 if (!VaildJson(JsonData) && JsonData != "")
                 {
-                    _Result_Code = "-4";
-                    _Result = "JsonErr";
-                    str_json = JsonConvert.SerializeObject(_res);
-                    return str_json;
+                    _res.Result_Code = "-4";
+                    _res.Result = "JsonErr";
+                    return _res;
                 }
                 using SqlConnection conn = new(_connectionString);
                 conn.Open();
@@ -46,24 +45,21 @@ namespace Net8CoreWebApi.Models
 
                 if (Convert.IsDBNull(cmd.Parameters["@Result_Code"].Value))
                 {
-                    _Result_Code = "-2";
-                    _Result = "查無資料";
+                    _res.Result_Code = "-2";
+                    _res.Result = "查無資料";
                 }
                 else
                 {
-                    _Result_Code = cmd.Parameters["@Result_Code"].Value.ToString();
-                    _Result = cmd.Parameters["@Result"].Value.ToString();
+                    _res.Result_Code = cmd.Parameters["@Result_Code"].Value.ToString();
+                    _res.Result = cmd.Parameters["@Result"].Value.ToString();
                 }
             }
             catch (Exception)
             {
-                _Result_Code = "-3";
-                _Result = "查無資料";
-            }
-            _res.Result = _Result;
-            _res.Result_Code = _Result_Code;
-            str_json = JsonConvert.SerializeObject(_res);            
-            return str_json;
+                _res.Result_Code = "-3";
+                _res.Result = "查無資料";
+            }          
+            return _res;
         }
 
         private static bool VaildJson(string Json)

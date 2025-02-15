@@ -9,11 +9,11 @@ namespace Net8CoreWebApi.Models
         {
             _com = comm;
         }
-        public string ListEmp() => (string)_com.DoAPI("List");
-        public string CreateEmp(CreateEmpClass _class) => (string)_com.DoAPI("Create", 0, JsonConvert.SerializeObject(_class));
-        public string GetEmp(int EmpID) => (string)_com.DoAPI("GetEmp", EmpID);
-        public string UpdateEmp(int EmpID, UpdateEmpClass _class) => (string)_com.DoAPI("Update", EmpID ,JsonConvert.SerializeObject(_class));
-        public string DeleteEmp(int EmpID) => (string)_com.DoAPI("Delete", EmpID);
+        public ApiResponse ListEmp() => _com.DoAPI("List");
+        public ApiResponse CreateEmp(CreateEmpClass _class) => _com.DoAPI("Create", 0, JsonConvert.SerializeObject(_class));
+        public ApiResponse GetEmp(int EmpID) => _com.DoAPI("GetEmp", EmpID);
+        public ApiResponse UpdateEmp(int EmpID, UpdateEmpClass _class) => _com.DoAPI("Update", EmpID, JsonConvert.SerializeObject(_class));
+        public ApiResponse DeleteEmp(int EmpID) => _com.DoAPI("Delete", EmpID);
 
         #region 參數
         public class CreateEmpClass
