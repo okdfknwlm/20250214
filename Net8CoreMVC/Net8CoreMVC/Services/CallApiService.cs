@@ -1,5 +1,6 @@
 ﻿using Net8CoreMVC.Models;
 using Newtonsoft.Json;
+using System.Reflection;
 
 namespace Net8CoreMVC.Services
 {
@@ -18,54 +19,83 @@ namespace Net8CoreMVC.Services
             public string Result { get; set; }
         }
 
-        private async Task<T> CallApiAsync<T>(string url, HttpMethod method, object data = null)
+        private T CallApi<T>(string url, HttpMethod method, object data = null)
         {
-            HttpRequestMessage request = new HttpRequestMessage(method, url);
-            
-            if (data != null)
+            try
             {
-                request.Content = JsonContent.Create(data);
+                HttpRequestMessage request = new HttpRequestMessage(method, url);
+
+                if (data != null)
+                {
+                    request.Content = JsonContent.Create(data);
+                }
+
+                var response = _httpClient.Send(request);
+
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception($"API error: {response.StatusCode}");
+
+                var responseContent = response.Content.ReadAsStringAsync().Result;
+
+                var apiResponse = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
+
+                if (apiResponse.Result_Code != "0000")
+                    throw new Exception(apiResponse?.Result ?? "Unknown error");
+
+                var result = JsonConvert.DeserializeObject<T>(apiResponse.Result);
+                return result;
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
             
-            var response = await _httpClient.SendAsync(request);
-
-            if (!response.IsSuccessStatusCode)
-                throw new Exception("API_error");
-            
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            var apiResponse = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
-
-            if (apiResponse.Result_Code != "0000")
-                throw new Exception(apiResponse?.Result ?? "Unknown error");
-                        
-            var result = JsonConvert.DeserializeObject<T>(apiResponse.Result);
-            return result;
         }
 
-        public Task<IEnumerable<EmpModel>> GetEmpListAsync()
+
+        private ApiResponse CallApiVoid(string url, HttpMethod method, object data = null)
         {
-            return CallApiAsync<IEnumerable<EmpModel>>("Emp", HttpMethod.Get);
+            try
+            {
+                HttpRequestMessage request = new HttpRequestMessage(method, url);
+
+                if (data != null)
+                {
+                    request.Content = JsonContent.Create(data);
+                }
+
+                var response = _httpClient.Send(request);
+
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception($"API error: {response.StatusCode}");
+
+                var responseContent = response.Content.ReadAsStringAsync().Result;
+
+                var apiResponse = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
+
+                if (apiResponse.Result_Code != "0000")
+                    throw new Exception(apiResponse?.Result ?? "Unknown error");
+
+                return apiResponse;
+            }
+            catch (Exception)
+            {
+                ApiResponse a = new();
+                return a;
+            }
+           
         }
 
-        public Task<EmpModel> GetEmpAsync(int EmpID)
-        {
-            return CallApiAsync<EmpModel>($"Emp/{EmpID}", HttpMethod.Get);
-        }
 
-        public Task<string> CreateEmpAsync(EmpModel model)
-        {
-            return CallApiAsync<string>("Emp", HttpMethod.Post, model);
-        }
+        public IEnumerable<EmpModel> GetEmpList() => CallApi<IEnumerable<EmpModel>>("Emp", HttpMethod.Get);
 
-        public Task<string> UpdateEmpAsync(int EmpID, EmpModel model)
-        {
-            return CallApiAsync<string>($"Emp/{EmpID}", HttpMethod.Put, model);
-        }
+        public EmpModel GetEmp(int EmpID) => CallApi<EmpModel>($"Emp/{EmpID}", HttpMethod.Get);
 
-        public Task<string> DeleteEmpAsync(int EmpID)
-        {
-            return CallApiAsync<string>($"Emp/{EmpID}", HttpMethod.Delete);
-        }
+        public ApiResponse CreateEmp(EmpModel model) => CallApiVoid("Emp", HttpMethod.Post, model);
+        
+        public ApiResponse UpdateEmp(int EmpID, EmpModel model) => CallApiVoid($"Emp/{EmpID}", HttpMethod.Put, model);
+
+        public ApiResponse DeleteEmp(int EmpID) => CallApiVoid($"Emp/{EmpID}", HttpMethod.Delete);
     }
 }
